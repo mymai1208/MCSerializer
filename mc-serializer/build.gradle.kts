@@ -1,6 +1,5 @@
 plugins {
     kotlin("jvm")
-    `maven-publish`
 }
 
 val mod_version: String by project

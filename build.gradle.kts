@@ -2,7 +2,6 @@ plugins {
     kotlin("jvm") version "1.9.22"
     id("fabric-loom") version "1.4-SNAPSHOT" apply false
     id("com.google.devtools.ksp") version "1.9.22-1.0.17" apply false
-    `maven-publish`
 }
 
 val mod_version: String by project
