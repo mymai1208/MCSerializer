@@ -6,10 +6,7 @@ import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
-import com.google.devtools.ksp.symbol.ClassKind
-import com.google.devtools.ksp.symbol.KSAnnotated
-import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.google.devtools.ksp.symbol.KSPropertyDeclaration
+import com.google.devtools.ksp.symbol.*
 import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ksp.toTypeName
@@ -97,10 +94,21 @@ class Processor(private val environment: SymbolProcessorEnvironment) : SymbolPro
     }
 
     private fun CodeBlock.Builder.createWritePacket(property: KSPropertyDeclaration, isVar: Boolean = false) {
-        val type = getTypeAsString(property)
+        val type = getTypeAsString(property.type.resolve())
 
         if(isVar) {
             addStatement("buf.writeVar${type}(${property.simpleName.asString()})")
+
+            return
+        }
+
+        if(type == "Map") {
+            val mapArgs = property.type.resolve().arguments
+
+            val firstArg = mapArgs[0].type?.resolve()?.let { getTypeAsString(it) }
+            val secondArg = mapArgs[1].type?.resolve()?.let { getTypeAsString(it) }
+
+            addStatement("buf.writeMap(${property.simpleName.asString()}, PacketByteBuf::write${firstArg}, PacketByteBuf::write${secondArg})")
 
             return
         }
@@ -109,7 +117,7 @@ class Processor(private val environment: SymbolProcessorEnvironment) : SymbolPro
     }
 
     private fun CodeBlock.Builder.createReadPacket(property: KSPropertyDeclaration, isVar: Boolean = false, isUnlimitedNBT: Boolean = false) {
-        val type = getTypeAsString(property)
+        val type = getTypeAsString(property.type.resolve())
 
         if(isVar) {
             addStatement("${property.simpleName.asString()} = buf.readVar${type}()")
@@ -123,11 +131,23 @@ class Processor(private val environment: SymbolProcessorEnvironment) : SymbolPro
             return
         }
 
+        if(type == "Map") {
+            val mapArgs = property.type.resolve().arguments
+
+            val firstArg = mapArgs[0].type?.resolve()?.let { getTypeAsString(it) }
+            val secondArg = mapArgs[1].type?.resolve()?.let { getTypeAsString(it) }
+
+            addStatement("${property.simpleName.asString()} = buf.readMap(PacketByteBuf::read${firstArg}, PacketByteBuf::read${secondArg})")
+
+            return
+        }
+
         addStatement("${property.simpleName.asString()} = buf.read${type}()")
     }
 
-    private fun getTypeAsString(property: KSPropertyDeclaration): String? {
-        return when (property.type.resolve().declaration.qualifiedName?.asString()) {
+    //declaration.simpleName
+    private fun getTypeAsString(type: KSType): String? {
+        return when (type.declaration.qualifiedName?.asString()) {
             "kotlin.Int" -> "Int"
             "kotlin.String" -> "String"
             "kotlin.Boolean" -> "Boolean"
@@ -143,9 +163,10 @@ class Processor(private val environment: SymbolProcessorEnvironment) : SymbolPro
             "net.minecraft.item.ItemStack" -> "ItemStack"
             "net.minecraft.util.Identifier" -> "Identifier"
             "net.minecraft.util.math.BlockPos" -> "BlockPos"
-            "java.util.UUID" -> "UUID"
+            "java.util.UUID" -> "Uuid"
             "net.minecraft.text.Text" -> "Text"
             "java.util.Map" -> "Map"
+            "kotlin.collections.Map" -> "Map"
             else -> null
         }
     }
