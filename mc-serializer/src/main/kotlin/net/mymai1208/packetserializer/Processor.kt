@@ -109,7 +109,7 @@ class Processor(private val environment: SymbolProcessorEnvironment) : SymbolPro
         val type = getTypeAsString(property.type.resolve())
 
         if(isVar) {
-            addStatement("buf.writeVar${type}(${property.simpleName.asString()})")
+            addStatement("buf.writeVar${type}(${property.simpleName.asString()}!!)")
 
             return
         }
@@ -125,7 +125,7 @@ class Processor(private val environment: SymbolProcessorEnvironment) : SymbolPro
             return
         }
 
-        addStatement("buf.write${type}(${property.simpleName.asString()})")
+        addStatement("buf.write${type}(${property.simpleName.asString()}!!)")
     }
 
     private fun CodeBlock.Builder.createReadPacket(property: KSPropertyDeclaration, isVar: Boolean = false, isUnlimitedNBT: Boolean = false) {
