@@ -3,8 +3,10 @@ plugins {
     `maven-publish`
 }
 
+val mod_version: String by project
+
 group = "net.mymai1208"
-version = "0.1-SNAPSHOT"
+version = mod_version
 
 repositories {
     mavenCentral()
@@ -19,6 +21,17 @@ dependencies {
 }
 
 publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/mymai1208/MCSerializer")
+            credentials {
+                username = System.getenv("GITHUB_USER")
+                password = System.getenv("GITHUB_TOKEN") as String?
+            }
+        }
+    }
+
     publications {
         create<MavenPublication>("maven") {
             from(components["kotlin"])

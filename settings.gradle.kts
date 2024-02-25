@@ -12,5 +12,5 @@ plugins {
 }
 
 rootProject.name = "MCSerializer"
-include("serializer")
-include("mod")
+include("mc-serializer")
+include("mc-serializer-mod")

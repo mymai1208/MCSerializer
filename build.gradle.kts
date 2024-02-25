@@ -5,6 +5,8 @@ plugins {
     `maven-publish`
 }
 
+val mod_version: String by project
+
 allprojects {
     repositories {
         mavenCentral()
@@ -22,7 +24,7 @@ tasks.test {
 subprojects {
     apply(plugin = "maven-publish")
     group = "net.mymai1208"
-    version = "0.1-SNAPSHOT"
+    version = mod_version
 
     repositories {
         mavenCentral()
