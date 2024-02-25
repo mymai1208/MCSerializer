@@ -142,7 +142,7 @@ class Processor(private val environment: SymbolProcessorEnvironment) : SymbolPro
             return
         }
 
-        addStatement("${property.simpleName.asString()} = buf.read${type}()")
+        addStatement("${property.simpleName.asString()} = buf.read${type}()!!")
     }
 
     //declaration.simpleName
