@@ -17,7 +17,6 @@ val fabric_api_version: String by project
 
 repositories {
     mavenCentral()
-    mavenLocal()
 }
 
 dependencies {
@@ -28,27 +27,8 @@ dependencies {
     modImplementation("net.fabricmc.fabric-api:fabric-api:${fabric_api_version}")
     modImplementation("net.fabricmc:fabric-language-kotlin:${fabric_kotlin_version}")
 
-    implementation(project(":mc-serializer"))
+    api(project(":mc-serializer"))
     ksp(project(":mc-serializer"))
-}
-
-publishing {
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/mymai1208/MCSerializer")
-            credentials {
-                username = System.getenv("GITHUB_USER")
-                password = System.getenv("GITHUB_TOKEN") as String?
-            }
-        }
-    }
-
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["kotlin"])
-        }
-    }
 }
 
 tasks {
