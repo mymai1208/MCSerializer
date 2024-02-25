@@ -9,6 +9,8 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.*
 import com.google.devtools.ksp.validate
 import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.jvm.jvmStatic
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 import net.mymai1208.packetserializer.annotation.Serializer
@@ -71,13 +73,19 @@ class Processor(private val environment: SymbolProcessorEnvironment) : SymbolPro
             })
         }
 
+        val createFuncSpec = FunSpec.builder("create").apply {
+            jvmStatic()
+            returns(ClassName("generated.packet", name))
+            addCode("return ${name}(${properties.joinToString(",") { "null" }})")
+        }
+
         return TypeSpec.classBuilder(name).apply {
             addSuperinterface(packetClass)
             addModifiers(KModifier.DATA)
 
             primaryConstructor(FunSpec.constructorBuilder().apply {
                 for (property in properties) {
-                    val propertyTypeName = if(property.isAnnotationPresent(Nullable::class) || property.type.resolve().isMarkedNullable) property.type.toTypeName().copy(true) else property.type.toTypeName()
+                    val propertyTypeName = property.type.toTypeName().copy(true)
 
                     addParameter(property.simpleName.asString(), propertyTypeName)
                     addProperty(
@@ -90,6 +98,10 @@ class Processor(private val environment: SymbolProcessorEnvironment) : SymbolPro
 
             addFunction(readFunSpec.build())
             addFunction(writeFuncSpec.build())
+
+            addType(TypeSpec.companionObjectBuilder().apply {
+                addFunction(createFuncSpec.build())
+            }.build())
         }.build()
     }
 
@@ -142,14 +154,9 @@ class Processor(private val environment: SymbolProcessorEnvironment) : SymbolPro
             return
         }
 
-        addStatement("${property.simpleName.asString()} = buf.read${type}()!!")
+        addStatement("${property.simpleName.asString()} = buf.read${type}()")
     }
 
-    //declaration.simpleName
-    private val MAP_QUALIFIELD_NAMES = listOf(
-        "kotlin.collections.Map",
-        "java.util.Map"
-    )
     private fun getTypeAsString(type: KSType): String? {
         return when (type.declaration.qualifiedName?.asString()) {
             "kotlin.Int" -> "Int"
