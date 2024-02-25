@@ -146,6 +146,10 @@ class Processor(private val environment: SymbolProcessorEnvironment) : SymbolPro
     }
 
     //declaration.simpleName
+    private val MAP_QUALIFIELD_NAMES = listOf(
+        "kotlin.collections.Map",
+        "java.util.Map"
+    )
     private fun getTypeAsString(type: KSType): String? {
         return when (type.declaration.qualifiedName?.asString()) {
             "kotlin.Int" -> "Int"
@@ -165,8 +169,9 @@ class Processor(private val environment: SymbolProcessorEnvironment) : SymbolPro
             "net.minecraft.util.math.BlockPos" -> "BlockPos"
             "java.util.UUID" -> "Uuid"
             "net.minecraft.text.Text" -> "Text"
-            "java.util.Map" -> "Map"
             "kotlin.collections.Map" -> "Map"
+            "kotlin.collections.MutableMap" -> "Map"
+            "java.util.Map" -> "Map"
             else -> null
         }
     }
