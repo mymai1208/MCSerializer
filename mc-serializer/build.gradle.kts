@@ -30,7 +30,7 @@ publishing {
 
             groupId = "net.mymai1208"
             artifactId = "mc-serializer"
-            version = version
+            version = project.version.toString()
         }
     }
 
