@@ -4,10 +4,8 @@ plugins {
     id("com.google.devtools.ksp")
 }
 
-val mod_version: String by project
 
 group = "net.mymai1208"
-version = mod_version
 
 val minecraft_version: String by project
 val yarn_mappings: String by project
@@ -35,7 +33,7 @@ tasks {
     processResources {
         filesMatching("fabric.mod.json") {
             expand(mapOf(
-                "version" to mod_version,
+                "version" to version,
                 "fabric_kotlin_version" to fabric_kotlin_version,
                 "fabric_loader_version" to loader_version
             ))
@@ -55,5 +53,28 @@ kotlin {
 
     compilerOptions {
         freeCompilerArgs.add("-Xjvm-default=all")
+    }
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["kotlin"])
+
+            groupId = "net.mymai1208"
+            artifactId = "mc-serializer-mod"
+            version = version
+        }
+    }
+
+    repositories {
+        maven {
+            name = "maven.mymai1208.net"
+            url = uri("https://maven.mymai1208.net/")
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
     }
 }

@@ -2,10 +2,7 @@ plugins {
     kotlin("jvm")
 }
 
-val mod_version: String by project
-
 group = "net.mymai1208"
-version = mod_version
 
 repositories {
     mavenCentral()
@@ -24,4 +21,27 @@ tasks.test {
 }
 kotlin {
     jvmToolchain(17)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["kotlin"])
+
+            groupId = "net.mymai1208"
+            artifactId = "mc-serializer"
+            version = version
+        }
+    }
+
+    repositories {
+        maven {
+            name = "maven.mymai1208.net"
+            url = uri("https://maven.mymai1208.net/")
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+    }
 }
